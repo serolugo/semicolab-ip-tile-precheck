@@ -1,0 +1,99 @@
+name: SemiCoLab Precheck
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  precheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Checkout tile repo ────────────────────────────────────────────────
+      - name: Checkout tile repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── Install OSS CAD Suite ─────────────────────────────────────────────
+      - name: Install OSS CAD Suite
+        run: |
+          wget -q https://github.com/YosysHQ/oss-cad-suite-build/releases/download/2024-11-26/oss-cad-suite-linux-x64-20241126.tgz
+          tar -xf oss-cad-suite-linux-x64-20241126.tgz
+          echo "$PWD/oss-cad-suite/bin" >> $GITHUB_PATH
+          echo "$PWD/oss-cad-suite/lib" >> $GITHUB_PATH
+
+      # ── Install Python dependencies ───────────────────────────────────────
+      - name: Install Python dependencies
+        run: pip install pyyaml
+
+      # ── Install Node.js + netlistsvg ──────────────────────────────────────
+      - name: Install netlistsvg
+        run: npm install -g netlistsvg
+
+      # ── Clone veriflow-precheck ───────────────────────────────────────────
+      - name: Clone veriflow-precheck
+        run: git clone https://github.com/serolugo/veriflow-precheck.git _veriflow
+
+      # ── Run precheck ──────────────────────────────────────────────────────
+      - name: Run precheck
+        run: |
+          python _veriflow/veriflow/cli.py precheck \
+            --repo . \
+            --run-number ${{ github.run_number }} \
+            --commit ${{ github.sha }} \
+            --author "${{ github.actor }}"
+
+      # ── Commit results ────────────────────────────────────────────────────
+      - name: Commit results
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add runs/ docs/ README.md
+          git diff --cached --quiet || \
+            git commit -m "[skip ci] ${{ github.run_number }} precheck results"
+          git push
+
+      # ── (FUTURE) Push to central registry ────────────────────────────────
+      # Uncomment and configure when the central registry repo is ready.
+      #
+      # - name: Register tile in central registry
+      #   if: success()
+      #   run: |
+      #     curl -X POST \
+      #       -H "Authorization: token ${{ secrets.REGISTRY_TOKEN }}" \
+      #       -H "Accept: application/vnd.github.v3+json" \
+      #       https://api.github.com/repos/semicolab/shuttle-registry/dispatches \
+      #       -d '{
+      #         "event_type": "tile_passed",
+      #         "client_payload": {
+      #           "tile_id":   "${{ github.event.repository.name }}",
+      #           "run":       "${{ github.run_number }}",
+      #           "commit":    "${{ github.sha }}",
+      #           "rtl_path":  "runs/run-${{ github.run_number }}/src",
+      #           "repo":      "${{ github.repository }}"
+      #         }
+      #       }'
+
+      # ── (FUTURE) Trigger LibreLane ────────────────────────────────────────
+      # Uncomment when LibreLane integration is ready.
+      # Only runs if precheck passed (job did not fail).
+      #
+      # - name: Trigger LibreLane
+      #   if: success()
+      #   run: |
+      #     curl -X POST \
+      #       -H "Authorization: token ${{ secrets.LIBRELANE_TOKEN }}" \
+      #       https://api.github.com/repos/semicolab/librelane-runner/dispatches \
+      #       -d '{
+      #         "event_type": "run_gds",
+      #         "client_payload": {
+      #           "tile_id":  "${{ github.event.repository.name }}",
+      #           "rtl_path": "runs/run-${{ github.run_number }}/src",
+      #           "commit":   "${{ github.sha }}"
+      #         }
+      #       }'
