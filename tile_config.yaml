@@ -1,22 +1,20 @@
-tile_name: "Adder Tile"
+tile_name: "Shift Register Tile"
 tile_author: "Roman Lugo"
-top_module: "adder_tile"
+top_module: "shift_reg_tile"
 shuttle: ""
 
 description: |
-  32-bit adder tile. Computes the sum of two 32-bit operands.
-  Result is available combinationally on the next clock edge.
+  32-bit shift register with parallel load.
+  Supports right shift by variable amount and synchronous parallel load.
 
 ports: |
-  data_reg_a  - operand A (32-bit input)
-  data_reg_b  - operand B (32-bit input)
-  data_reg_c  - result A + B (32-bit output)
-  csr_in/out  - not used
-  clk/arst_n  - clock and reset (present but not used in combinational logic)
+  csr_in[0]   - shift enable
+  csr_in[1]   - load enable (takes priority over shift)
+  data_reg_a  - parallel load data (32-bit)
+  data_reg_b  - shift amount (bits [4:0], 0-31)
+  data_reg_c  - register output (32-bit)
+  csr_out     - mirrors csr_in[1:0] as status
 
 usage_guide: |
-  Connect operands to data_reg_a and data_reg_b.
-  Read result from data_reg_c on the next clock cycle.
-
-tb_description: |
-  Tests basic sums, large values and overflow behavior.
+  Assert csr_in[1] to load data_reg_a into the register.
+  Assert csr_in[0] to shift right by data_reg_b positions.
