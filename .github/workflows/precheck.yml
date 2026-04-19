@@ -35,6 +35,10 @@ jobs:
       - name: Install netlistsvg
         run: npm install -g netlistsvg
 
+      # ── Install pandoc ────────────────────────────────────────────────────
+      - name: Install pandoc
+        run: sudo apt-get install -y pandoc texlive-latex-base texlive-fonts-recommended
+
       # ── Clone veriflow-precheck ───────────────────────────────────────────
       - name: Clone veriflow-precheck
         run: git clone https://github.com/serolugo/veriflow-precheck.git _veriflow
@@ -55,7 +59,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add runs/ docs/ README.md
           git diff --cached --quiet || \
-            git commit -m "[skip ci] ${{ github.run_number }} precheck results"
+            git commit -m "[skip ci] run-${{ github.run_number }} precheck results"
           git push
 
       # ── (FUTURE) Push to central registry ────────────────────────────────
@@ -67,7 +71,7 @@ jobs:
       #     curl -X POST \
       #       -H "Authorization: token ${{ secrets.REGISTRY_TOKEN }}" \
       #       -H "Accept: application/vnd.github.v3+json" \
-      #       https://api.github.com/repos/semicolab/shuttle-registry/dispatches \
+      #       https://api.github.com/repos/serolugo/shuttle-registry/dispatches \
       #       -d '{
       #         "event_type": "tile_passed",
       #         "client_payload": {
@@ -81,14 +85,14 @@ jobs:
 
       # ── (FUTURE) Trigger LibreLane ────────────────────────────────────────
       # Uncomment when LibreLane integration is ready.
-      # Only runs if precheck passed (job did not fail).
+      # Only activates if precheck passed.
       #
       # - name: Trigger LibreLane
       #   if: success()
       #   run: |
       #     curl -X POST \
       #       -H "Authorization: token ${{ secrets.LIBRELANE_TOKEN }}" \
-      #       https://api.github.com/repos/semicolab/librelane-runner/dispatches \
+      #       https://api.github.com/repos/serolugo/librelane-runner/dispatches \
       #       -d '{
       #         "event_type": "run_gds",
       #         "client_payload": {
