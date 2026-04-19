@@ -32,18 +32,13 @@ jobs:
 
       # ── Install Python dependencies ───────────────────────────────────────
       - name: Install Python dependencies
-        run: pip install pyyaml
+        run: |
+          sudo apt-get install -y -q libpango-1.0-0 libpangoft2-1.0-0
+          pip install pyyaml weasyprint markdown
 
       # ── Install Node.js + netlistsvg ──────────────────────────────────────
       - name: Install netlistsvg
         run: npm install -g netlistsvg
-
-      # ── Install pandoc + wkhtmltopdf ─────────────────────────────────────
-      - name: Install pandoc and wkhtmltopdf
-        run: |
-          wget -q https://github.com/jgm/pandoc/releases/download/3.1.9/pandoc-3.1.9-1-amd64.deb
-          sudo dpkg -i pandoc-3.1.9-1-amd64.deb
-          sudo apt-get install -y -q wkhtmltopdf
 
       # ── Clone veriflow-precheck ───────────────────────────────────────────
       - name: Clone veriflow-precheck
