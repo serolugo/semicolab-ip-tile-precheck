@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   precheck:
     runs-on: ubuntu-latest
@@ -37,7 +40,9 @@ jobs:
 
       # ── Install pandoc ────────────────────────────────────────────────────
       - name: Install pandoc
-        run: sudo apt-get install -y pandoc texlive-latex-base texlive-fonts-recommended
+        run: |
+          wget -q https://github.com/jgm/pandoc/releases/download/3.1.9/pandoc-3.1.9-1-amd64.deb
+          sudo dpkg -i pandoc-3.1.9-1-amd64.deb
 
       # ── Clone veriflow-precheck ───────────────────────────────────────────
       - name: Clone veriflow-precheck
@@ -57,7 +62,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add runs/ docs/ README.md
+          git add docs/ logs/ README.md
           git diff --cached --quiet || \
             git commit -m "[skip ci] run-${{ github.run_number }} precheck results"
           git push
@@ -78,7 +83,7 @@ jobs:
       #           "tile_id":   "${{ github.event.repository.name }}",
       #           "run":       "${{ github.run_number }}",
       #           "commit":    "${{ github.sha }}",
-      #           "rtl_path":  "runs/run-${{ github.run_number }}/src",
+      #           "rtl_path":  "src",
       #           "repo":      "${{ github.repository }}"
       #         }
       #       }'
@@ -97,7 +102,7 @@ jobs:
       #         "event_type": "run_gds",
       #         "client_payload": {
       #           "tile_id":  "${{ github.event.repository.name }}",
-      #           "rtl_path": "runs/run-${{ github.run_number }}/src",
+      #           "rtl_path": "src",
       #           "commit":   "${{ github.sha }}"
       #         }
       #       }'
