@@ -12,8 +12,8 @@ module shift_reg_tile #(
     input  wire [REG_WIDTH-1:0]      data_reg_b,
     output reg  [REG_WIDTH-1:0]      data_reg_c,
     output wire [CSR_OUT_WIDTH-1:0]  csr_out,
-    output wire                      csr_in_re,
-    output wire                      csr_out_we
+    output wire                      csr_in_re
+    
 );
 
     // csr_in[0] = shift enable
@@ -33,6 +33,6 @@ module shift_reg_tile #(
 
     assign csr_out    = {14'b0, csr_in[1], csr_in[0]};
     assign csr_in_re  = 1'b1;
-    assign csr_out_we = 1'b1;
+
 
 endmodule
