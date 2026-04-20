@@ -1,0 +1,13 @@
+{
+  "tile_id": "semicolab-ip-tile-precheck",
+  "shuttle": "",
+  "status": "PASS",
+  "connectivity": "PASS",
+  "synthesis": "PASS",
+  "cells": 236,
+  "date": "2026-04-20",
+  "commit": "2f1e400902fe9e44fabb0bb86f4169600626fa9a",
+  "author": "serolugo",
+  "run": "run-016",
+  "rtl_path": "src"
+}
